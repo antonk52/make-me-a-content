@@ -14,7 +14,7 @@ npm install -D make-me-a-content
 import {mmac} from 'make-me-a-content'
 
 mmac({
-    upageScript: 'npm run update-docs',
+    updateScript: 'npm run update-docs',
     filepath: './path/to/file.ext',
     lines: ['new content', 'to be inserted', 'between', 'marks']
 })
@@ -27,7 +27,7 @@ import {mmac} from 'make-me-a-content'
 import prettier from 'prettier'
 
 mmac({
-    upageScript: 'npm run update-docs',
+    updateScript: 'npm run update-docs',
     filepath: './path/to/file.ext',
     lines: ['new content'],
     transform: (newContent) => prettier.format(newContent, {/* prettier options */})
