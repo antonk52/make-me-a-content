@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "lib": ["es2018"],
+        "esModuleInterop": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedParameters": true,
+        "noErrorTruncation": true,
+        "strict": true,
+        "declaration": true,
+
+        "target": "es2018",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "baseUrl": "./src"
+    },
+    "include": ["src/**/*.ts"],
+    "exclude": ["src/**/spec", "./package.json"]
+}
