@@ -6,7 +6,7 @@ import escapeStringRegexp from 'escape-string-regexp';
 function getMd5Hash(input: string) {
     return createHash('md5').update(input).digest('hex');
 }
-export function regex(
+function regex(
     strs: TemplateStringsArray,
     ...values: Array<string>
 ): RegExp {
