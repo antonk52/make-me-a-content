@@ -77,7 +77,7 @@ type MmacOptions = {
 	/**
      * add new exensions or overwride existsing
      */
-	comments: Record<string, Comment>;
+	comments?: Record<string, Comment>;
 	/**
      * transform new file content
      */
