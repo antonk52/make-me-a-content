@@ -5,12 +5,15 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
+    "lint": "rome check",
+    "lint:fix": "rome check --apply",
     "test": "exit 1"
   },
   "author": "antonk52",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^10.17.37",
+    "rome": "^10.0.4-beta",
     "typescript": "^4.0.3"
   },
   "dependencies": {
