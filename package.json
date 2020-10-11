@@ -11,7 +11,9 @@
     "build": "tsc",
     "lint": "rome check",
     "lint:fix": "rome check --apply",
-    "test": "exit 1"
+    "test": "exit 1",
+    "preversion": "rm -rf ./dist && npm run build && npm run lint",
+    "postversion": "npm publish && git push --follow-tags"
   },
   "author": "antonk52",
   "license": "MIT",
