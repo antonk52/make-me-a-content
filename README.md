@@ -1,4 +1,7 @@
 # make-me-a-content
+[![npm version](https://badge.fury.io/js/make-me-a-content.svg)](https://badge.fury.io/js/make-me-a-content)
+[![install size](https://packagephobia.now.sh/badge?p=make-me-a-content)](https://packagephobia.now.sh/result?p=make-me-a-content)
+[![Coverage Status](https://coveralls.io/repos/github/antonk52/make-me-a-content/badge.svg)](https://coveralls.io/github/antonk52/make-me-a-content)
 
 `mmac` allows you to have templated sections in your source code and documentation.
 
