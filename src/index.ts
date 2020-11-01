@@ -165,7 +165,7 @@ const commands: Record<VCS, [string, Array<string>]> = {
 	mercurial: ["hg", ["status", "-m"]],
 };
 
-export function mmacCheck(
+export function checkUnstaged(
 	{
 		vcs = "git",
 	}: {
@@ -188,7 +188,7 @@ export function mmacCheck(
 		throw error;
 	}
 
-	if ((stderr?.toString?.()).length) {
+	if (stderr && stderr.toString().length) {
 		throw new Error(`VCS error\n${stderr.toString().trim()}`);
 	}
 

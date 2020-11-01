@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import arg from "arg";
-import {mmacCheck} from ".";
+import {checkUnstaged} from ".";
 
 function mmacCli() {
 	const {
@@ -52,7 +52,7 @@ function mmacCli() {
 		process.exit(1);
 	}
 
-	const modifiedFiles = mmacCheck({vcs});
+	const modifiedFiles = checkUnstaged({vcs});
 
 	if (modifiedFiles.length) {
 		process.stderr.write(
