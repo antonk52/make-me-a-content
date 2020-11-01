@@ -1,5 +1,6 @@
 import {promises as fs} from "fs";
 import {extname} from "path";
+import {spawnSync} from "child_process";
 import {createHash} from "crypto";
 import escapeStringRegexp from "escape-string-regexp";
 
@@ -155,4 +156,41 @@ export async function mmac(
 	];
 
 	await fs.writeFile(filepath, transform(newContentLines.join("\n")));
+}
+
+type VCS = "git" | "svn" | "mercurial";
+const commands: Record<VCS, [string, Array<string>]> = {
+	git: ["git", ["ls-files", "-m"]],
+	svn: ["svn", ["status"]],
+	mercurial: ["hg", ["status", "-m"]],
+};
+
+export function checkUnstaged(
+	{
+		vcs = "git",
+	}: {
+		vcs?: VCS;
+	} = {},
+): Array<string> {
+	if (!(vcs in commands)) {
+		throw new Error(`Unsupported VCS option "${vcs}"`);
+	}
+	const cmd = commands[vcs];
+	const {stdout, stderr, error} = spawnSync(...cmd);
+
+	if (error) {
+		if (error.message.endsWith("ENOENT")) {
+			throw new Error(
+				`Unknown VCS ${vcs}, looks like you don't have ${cmd[0]} installed`,
+			);
+		}
+
+		throw error;
+	}
+
+	if (stderr && stderr.toString().length) {
+		throw new Error(`VCS error\n${stderr.toString().trim()}`);
+	}
+
+	return stdout.toString().split("\n").filter(Boolean);
 }

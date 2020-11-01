@@ -1,7 +1,8 @@
-import {mmac} from "..";
+import {checkUnstaged, mmac} from "..";
 import fs from "fs";
 // rome-ignore resolver/unknownExport
 import prettier from "prettier";
+import {spawnSync} from "child_process";
 
 const readFile = (fs.promises.readFile as jest.Mock);
 const writeFile = (fs.promises.writeFile as jest.Mock<
@@ -25,9 +26,17 @@ jest.mock(
 	},
 );
 
+jest.mock(
+	"child_process",
+	() => ({
+		spawnSync: jest.fn(),
+	}),
+);
+
 beforeEach(() => {
 	(fs.promises.writeFile as jest.Mock).mockClear();
 	(fs.promises.readFile as jest.Mock).mockClear();
+	(spawnSync as jest.Mock).mockClear();
 });
 
 describe(
@@ -438,6 +447,83 @@ describe(
 						"",
 					].join("\n"),
 				]);
+			},
+		);
+	},
+);
+
+describe(
+	"checkUnstaged",
+	() => {
+		it(
+			"works in a positive case",
+			() => {
+				(spawnSync as jest.Mock).mockReturnValueOnce({
+					stdout: Buffer.from("foo.js\nbar.js"),
+				});
+
+				const result = checkUnstaged();
+
+				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+				expect(result).toEqual(["foo.js", "bar.js"]);
+			},
+		);
+
+		it(
+			"throws for unknown VCS",
+			() => {
+				expect((spawnSync as jest.Mock).mock.calls.length).toBe(0);
+				expect(() => {
+					// @ts-expect-error
+					checkUnstaged({vcs: "arc"});
+				}).toThrow("Unsupported VCS option");
+			},
+		);
+
+		it(
+			"throws for supported but not installed VCS",
+			() => {
+				(spawnSync as jest.Mock).mockReturnValueOnce({
+					stdout: Buffer.from(""),
+					stderr: Buffer.from(""),
+					error: new Error("arc is not installed ENOENT"),
+				});
+
+				expect(() => {
+					checkUnstaged({vcs: "svn"});
+				}).toThrow("Unknown VCS svn, looks like you don't have svn installed");
+				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+			},
+		);
+
+		it(
+			"throws for other error from spawed scripts",
+			() => {
+				(spawnSync as jest.Mock).mockReturnValueOnce({
+					stdout: Buffer.from(""),
+					stderr: Buffer.from(""),
+					error: new Error("things went south"),
+				});
+
+				expect(() => {
+					checkUnstaged({vcs: "git"});
+				}).toThrow("things went south");
+				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+			},
+		);
+
+		it(
+			"VCS error in stderr",
+			() => {
+				(spawnSync as jest.Mock).mockReturnValueOnce({
+					stdout: Buffer.from(""),
+					stderr: Buffer.from("unknown flag in legacy version"),
+				});
+
+				expect(() => {
+					checkUnstaged({vcs: "git"});
+				}).toThrow("VCS error\nunknown flag in legacy version");
+				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
 			},
 		);
 	},
