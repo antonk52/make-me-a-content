@@ -54,7 +54,7 @@ import path from 'path'
 import {mmac} from 'make-me-a-content'
 
 async function updateScripts() {
-    const thingsDirContents = await fs.promises.readDir('./path/to/things') // ['foo.js', 'bar.js']
+    const thingsDirContents = await fs.promises.readdir('./path/to/things') // ['foo.js', 'bar.js']
 
     // --- Source code
     const newSourceCodeContent = [
