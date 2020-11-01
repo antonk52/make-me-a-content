@@ -127,6 +127,38 @@ mmac({
 - **comments** add new comments by a file extension or overwrite existing ones
 - **transform** modify the new file content
 
+## Check for unstaged files
+
+If you think of generating content for your project, you probably want to make sure that the content is always up to date. You can do this by calling `mmac-check` in a precommit and/or a CI check. You should call it directly after your content generation scripts. The script in your `package.json` should look similar to below.
+
+```json
+{
+    "name": "project-name",
+    "scripts": {
+        "generate-content": "node ./scripts/update-docs.js && mmac-check",
+    }
+}
+```
+
+Alternatively you can check for unstaged files yourself using a provided `checkUnstaged` function.
+
+```js
+import {mmac, checkUnstaged} from 'make-me-a-content'
+
+function main() {
+    const updateScript = 'npm run generate-content'
+
+    mmac({updateScript, /* ... */})
+
+    const files = checkUnstaged()
+
+    if (files.length > 0) {
+        console.log(`Unstaged files, run "${updateScript}" locally and commit the changes`)
+        process.exit(1)
+    }
+}
+```
+
 ## FAQ
 
 ### The very first generation
