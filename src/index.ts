@@ -188,7 +188,7 @@ export function checkUnstaged(
 		throw error;
 	}
 
-	if (stderr && stderr.toString().length) {
+	if (stderr?.toString().length) {
 		throw new Error(`VCS error\n${stderr.toString().trim()}`);
 	}
 
