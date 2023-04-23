@@ -1,6 +1,5 @@
 import {checkUnstaged, mmac} from "..";
 import fs from "fs";
-// rome-ignore resolver/unknownExport
 import prettier from "prettier";
 import {spawnSync} from "child_process";
 
