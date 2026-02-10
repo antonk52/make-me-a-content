@@ -5,6 +5,7 @@ import {checkUnstaged} from ".";
 
 function mmacCli() {
 	const {values} = parseArgs({
+		args: process.argv.slice(2),
 		options: {
 			"help": {type: "boolean"},
 			"update-script": {type: "string"},
