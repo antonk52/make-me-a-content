@@ -1,18 +1,20 @@
 #!/usr/bin/env node
 
-import arg from "arg";
+import {parseArgs} from "util";
 import {checkUnstaged} from ".";
 
 function mmacCli() {
-	const {
-		"--help": showHelp = false,
-		"--update-script": updateScript,
-		"--vcs": vcs = "git",
-	} = arg({
-		"--help": Boolean,
-		"--update-script": String,
-		"--vcs": String,
+	const {values} = parseArgs({
+		options: {
+			"help": {type: "boolean"},
+			"update-script": {type: "string"},
+			"vcs": {type: "string"},
+		},
 	});
+
+	const showHelp = values.help ?? false;
+	const updateScript = values["update-script"];
+	const vcs = values.vcs ?? "git";
 
 	if (showHelp) {
 		process.stdout.write(

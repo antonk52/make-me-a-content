@@ -2,7 +2,6 @@ import {promises as fs} from "fs";
 import {extname} from "path";
 import {spawnSync} from "child_process";
 import {createHash} from "crypto";
-import escapeStringRegexp from "escape-string-regexp";
 
 function getMd5Hash(input: string) {
 	return createHash("md5").update(input).digest("hex");
@@ -18,7 +17,7 @@ function regex(strs: TemplateStringsArray, ...values: Array<string>): RegExp {
 		}
 
 		const value = values[i];
-		pattern += escapeStringRegexp(value);
+		pattern += RegExp.escape(value);
 	}
 
 	return new RegExp(pattern);
