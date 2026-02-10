@@ -1,41 +1,35 @@
 import {checkUnstaged, mmac} from "..";
-import fs from "fs";
 import prettier from "prettier";
-import {spawnSync} from "child_process";
+import {vi, beforeEach, describe, it, expect} from "vitest";
 
-const readFile = (fs.promises.readFile as jest.Mock);
-const writeFile = (fs.promises.writeFile as jest.Mock<
-	Promise<void>,
-	[string, Buffer | string]
->);
+// Create the mocked functions using vi.hoisted to ensure they're available
+const {readFile, writeFile} = vi.hoisted(() => ({
+	readFile: vi.fn(),
+	writeFile: vi.fn(),
+}));
 
-jest.mock(
-	"fs",
-	() => {
-		const fs = jest.requireActual("fs");
+const mockSpawnSync = vi.hoisted(() => vi.fn());
 
-		return {
-			// need the original fs functions, otherwise prettier throws
-			...fs,
-			promises: {
-				readFile: jest.fn(),
-				writeFile: jest.fn(),
-			},
-		};
-	},
-);
+vi.mock("fs", async () => {
+	const actual = await vi.importActual<typeof import("fs")>("fs");
 
-jest.mock(
-	"child_process",
-	() => ({
-		spawnSync: jest.fn(),
-	}),
-);
+	return {
+		// need the original fs functions, otherwise prettier throws
+		...actual,
+		default: actual,
+		promises: {
+			readFile,
+			writeFile,
+		},
+	};
+});
+
+vi.mock("child_process", () => ({
+	spawnSync: mockSpawnSync,
+}));
 
 beforeEach(() => {
-	(fs.promises.writeFile as jest.Mock).mockClear();
-	(fs.promises.readFile as jest.Mock).mockClear();
-	(spawnSync as jest.Mock).mockClear();
+	vi.clearAllMocks();
 });
 
 describe(
@@ -116,7 +110,7 @@ describe(
 					updateScript: "npm run update-things",
 					filepath: "foo.js",
 				};
-				expect(() => mmac(args)).rejects.toThrowError(
+				await expect(() => mmac(args)).rejects.toThrowError(
 					'No content provided for file "foo.js"',
 				);
 			},
@@ -457,13 +451,13 @@ describe(
 		it(
 			"works in a positive case",
 			() => {
-				(spawnSync as jest.Mock).mockReturnValueOnce({
+				mockSpawnSync.mockReturnValueOnce({
 					stdout: Buffer.from("foo.js\nbar.js"),
 				});
 
 				const result = checkUnstaged();
 
-				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+				expect(mockSpawnSync.mock.calls.length).toBe(1);
 				expect(result).toEqual(["foo.js", "bar.js"]);
 			},
 		);
@@ -471,7 +465,7 @@ describe(
 		it(
 			"throws for unknown VCS",
 			() => {
-				expect((spawnSync as jest.Mock).mock.calls.length).toBe(0);
+				expect(mockSpawnSync.mock.calls.length).toBe(0);
 				expect(() => {
 					// @ts-expect-error
 					checkUnstaged({vcs: "arc"});
@@ -482,7 +476,7 @@ describe(
 		it(
 			"throws for supported but not installed VCS",
 			() => {
-				(spawnSync as jest.Mock).mockReturnValueOnce({
+				mockSpawnSync.mockReturnValueOnce({
 					stdout: Buffer.from(""),
 					stderr: Buffer.from(""),
 					error: new Error("arc is not installed ENOENT"),
@@ -491,14 +485,14 @@ describe(
 				expect(() => {
 					checkUnstaged({vcs: "svn"});
 				}).toThrow("Unknown VCS svn, looks like you don't have svn installed");
-				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+				expect(mockSpawnSync.mock.calls.length).toBe(1);
 			},
 		);
 
 		it(
 			"throws for other error from spawed scripts",
 			() => {
-				(spawnSync as jest.Mock).mockReturnValueOnce({
+				mockSpawnSync.mockReturnValueOnce({
 					stdout: Buffer.from(""),
 					stderr: Buffer.from(""),
 					error: new Error("things went south"),
@@ -507,14 +501,14 @@ describe(
 				expect(() => {
 					checkUnstaged({vcs: "git"});
 				}).toThrow("things went south");
-				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+				expect(mockSpawnSync.mock.calls.length).toBe(1);
 			},
 		);
 
 		it(
 			"VCS error in stderr",
 			() => {
-				(spawnSync as jest.Mock).mockReturnValueOnce({
+				mockSpawnSync.mockReturnValueOnce({
 					stdout: Buffer.from(""),
 					stderr: Buffer.from("unknown flag in legacy version"),
 				});
@@ -522,7 +516,7 @@ describe(
 				expect(() => {
 					checkUnstaged({vcs: "git"});
 				}).toThrow("VCS error\nunknown flag in legacy version");
-				expect((spawnSync as jest.Mock).mock.calls.length).toBe(1);
+				expect(mockSpawnSync.mock.calls.length).toBe(1);
 			},
 		);
 	},
